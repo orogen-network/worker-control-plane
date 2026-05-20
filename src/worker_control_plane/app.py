@@ -60,6 +60,8 @@ def build_app(
     autostart_heartbeat: bool = False,
 ) -> FastAPI:
     require_internal_token()
+    if os.environ.get("OROGEN_ENV", "").lower() == "production" and registry is None:
+        raise RuntimeError("production control plane requires a real RegistryClient")
 
     reg_client: RegistryClient = registry or MockRegistryClient()
 

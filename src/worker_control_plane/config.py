@@ -28,6 +28,7 @@ class ControlPlaneConfig:
     heartbeat_interval_s: float = 12.0
     price_per_million_tokens: int = 2_000_000
     endpoint_url: str = ""
+    gateway_auth_token: str = ""
     # On-chain operator stake amount declared at registration (denominated in CUC).
     stake_amount: int = 5000_000_000
     # Optional: bond commission in bps (1000 = 10%).

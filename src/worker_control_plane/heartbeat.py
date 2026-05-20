@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import os
 import time
 from collections.abc import Callable
 
@@ -23,6 +24,15 @@ from worker_control_plane.capability import (
 from worker_control_plane.config import ControlPlaneConfig
 
 CapabilityProvider = Callable[[], list[CapabilitySource]]
+
+
+def _gateway_auth_headers(config: ControlPlaneConfig) -> dict[str, str]:
+    token = (
+        config.gateway_auth_token
+        or os.environ.get("GATEWAY_INTERNAL_AUTH_TOKEN", "")
+        or os.environ.get("INTERNAL_AUTH_TOKEN", "")
+    ).strip()
+    return {"Authorization": f"Bearer {token}"} if token else {}
 
 
 def build_heartbeat(
@@ -88,7 +98,11 @@ class HeartbeatPusher:
         url = f"{self.config.gateway_ws_url}{self.gateway_http_path}"
         try:
             async with httpx.AsyncClient(timeout=2.0) as client:
-                await client.post(url, json=hb.model_dump(mode="json"))
+                await client.post(
+                    url,
+                    json=hb.model_dump(mode="json"),
+                    headers=_gateway_auth_headers(self.config),
+                )
             self.sent_count += 1
         except httpx.HTTPError:
             self.error_count += 1

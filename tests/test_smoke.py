@@ -254,6 +254,10 @@ async def test_heartbeat_now_pushes_to_mocked_gateway(
             assert body["sent_count"] == 1
             assert body["heartbeat"]["operator_id"] == "op-cp"
             assert body["heartbeat"]["signature"]
+        assert (
+            mocker.calls[0].request.headers["authorization"]
+            == f"Bearer {INTERNAL_TOKEN}"
+        )
 
 
 def test_pusher_push_once_increments_error_count(config: ControlPlaneConfig) -> None:
